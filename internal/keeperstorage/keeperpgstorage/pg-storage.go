@@ -110,7 +110,7 @@ func (s *PostgresStorage) DeleteSecret(ctx context.Context, secretID uuid.UUID) 
 	`, secretID).Err()
 
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return errors.New("secret not found")
 		}
 		return err

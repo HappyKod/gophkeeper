@@ -45,11 +45,11 @@ func registerHandler(c *gin.Context) {
 	storage := container.GetUserStorage()
 	var user models.User
 	if err := c.BindJSON(&user); err != nil {
-		c.String(http.StatusInternalServerError, constans.ErrorUnmarshalBody)
+		c.String(http.StatusBadRequest, constans.ErrorUnmarshalBody)
 		return
 	}
 	if user.Login == "" || user.Password == "" {
-		c.AbortWithStatus(http.StatusBadRequest)
+		c.String(http.StatusBadRequest, "login or password is empty")
 		return
 	}
 	err := storage.AddUser(ctx, user)
