@@ -64,11 +64,12 @@
 
 name: go vet test
 
-#on:
-#  pull_request:
-#  push:
-#    branches:
-#      - main
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - DEV
 
 jobs:
   statictest:
