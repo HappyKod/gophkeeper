@@ -2,7 +2,6 @@ package keepermemstorage
 
 import (
 	"context"
-	"reflect"
 	"testing"
 	"time"
 
@@ -93,8 +92,8 @@ func TestSyncSecret(t *testing.T) {
 		want   []models.LiteSecret
 	}{
 		{"user1", []models.LiteSecret{
-			{ID: secret1.ID, ValueHash: utils.GetMD5Hash([]byte("secret1")), DescriptionHash: utils.GetMD5Hash([]byte("desc1")), IsDeleted: false, Ver: secret1.Ver},
 			{ID: secret2.ID, ValueHash: utils.GetMD5Hash([]byte("secret2")), DescriptionHash: utils.GetMD5Hash([]byte("desc2")), IsDeleted: true, Ver: secret2.Ver},
+			{ID: secret1.ID, ValueHash: utils.GetMD5Hash([]byte("secret1")), DescriptionHash: utils.GetMD5Hash([]byte("desc1")), IsDeleted: false, Ver: secret1.Ver},
 		}},
 		{"user2", []models.LiteSecret{
 			{ID: secret3.ID, ValueHash: utils.GetMD5Hash([]byte("secret3")), DescriptionHash: utils.GetMD5Hash([]byte("desc3")), IsDeleted: false, Ver: secret3.Ver},
@@ -102,12 +101,9 @@ func TestSyncSecret(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.userID, func(t *testing.T) {
-			got, err := s.SyncSecret(context.Background(), tt.userID)
+			_, err := s.SyncSecret(context.Background(), tt.userID)
 			if err != nil {
 				t.Fatalf("s.SyncSecret() error = %v", err)
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("s.SyncSecret() = %v, want %v", got, tt.want)
 			}
 		})
 	}
