@@ -8,7 +8,7 @@ name: gophkeer-ci
 #image: golang:1.19
 
 jobs:
-  runs-on: centos-latest
+  runs-on: ubuntu-latest
   container: golang:1.19
   statictest:
     steps:
