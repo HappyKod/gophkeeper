@@ -41,6 +41,6 @@ jobs:
         run: go build -o binaries/gophkeeperserver -ldflags=" -X 'main.buildDate=$GITHUB_RUN_STARTED_AT' -X 'main.commitAuthor=$GITHUB_ACTOR' -X 'main.buildCommit=$GITHUB_SHA' " -x -v cmd/gophkeeperserver/main.go
       - name: Archive binaries
         uses: actions/upload-artifact@v2
-    with:
-      name: binaries
-      path: binaries/
+        with:
+          name: binaries
+          path: binaries/
