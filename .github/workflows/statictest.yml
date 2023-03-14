@@ -1,94 +1,31 @@
-name: CI
+name: go vet test
 
 on:
-push:
-  branches: [ DEV ]
-pull_request:
-  branches: [ main ]
+  pull_request:
+  push:
+    branches:
+      - main
 
 jobs:
-  static-test:
-  runs-on: ubuntu-latest
-  steps:
-    - name: Checkout code
-  uses: actions/checkout@v2
-    - name: Install golangci-lint
-  run: |
-    curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.50.1
-    - name: Run golangci-lint
-    run: golangci-lint run
-#    - name: Install errcheck-lint
-#  run: go install github.com/kisielk/errcheck@latest
-#    - name: Run errcheck-lint
-#  run: errcheck ./...
-#
-#  unit-tests:
-#  runs-on: ubuntu-latest
-#  steps:
-#    - name: Checkout code
-#  uses: actions/checkout@v2
-#    - name: Run unit tests
-#  run: go test ./...
-#
-#  build:
-#  runs-on: ubuntu-latest
-#  steps:
-#    - name: Checkout code
-#  uses: actions/checkout@v2
-#    - name: Create binaries directory
-#  run: mkdir binaries
-#    - name: Build gophkeeperclient
-#  run: go build -o binaries/gophkeeperclient -ldflags=" -X 'main.buildDate=$GITHUB_RUN_STARTED_AT' -X 'main.commitAuthor=$GITHUB_ACTOR' -X 'main.buildCommit=$GITHUB_SHA' " -x -v cmd/gophkeeperclient/main.go
-#    - name: Build gophkeeperserver
-#  run: go build -o binaries/gophkeeperserver -ldflags=" -X 'main.buildDate=$GITHUB_RUN_STARTED_AT' -X 'main.commitAuthor=$GITHUB_ACTOR' -X 'main.buildCommit=$GITHUB_SHA' " -x -v cmd/gophkeeperserver/main.go
-#    - name: Archive binaries
-#  uses: actions/upload-artifact@v2
-#  with:
-#  name: binaries
-#  path: binaries/
+  statictest:
+    runs-on: ubuntu-latest
+    container: golang:1.19
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
 
+      - name: Download statictest binary
+        uses: robinraju/release-downloader@v1
+        with:
+          repository: Yandex-Practicum/go-autotests-bin
+          latest: true
+          fileName: statictest
+          out-file-path: .tools
 
-#name: gophkeer-ci
-#
-##stages:
-##  - static-test
-##  - unit-tests
-##  - build
-#
-##image: golang:1.19
-#
-#jobs:
-#  runs-on: ubuntu-latest
-#  container: golang:1.19
-#  statictest:
-#    steps:
-#      - name: golangci-lint
-#        run:
-#          - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.50.1
-#          - golangci-lint --version
-#          - golangci-lint run
-##
-##errcheck-lint:
-##  stage: "static-test"
-##  script:
-##    - go install github.com/kisielk/errcheck@latest
-##    - errcheck ./...
-##
-##golang-test:
-##  stage: "unit-tests"
-##  script:
-##    - go test ./...
-##
-##build:
-##  stage: "build"
-##  tags:
-##    - "docker"
-##  before_script:
-##    - mkdir binaries
-##  script:
-##    - go build -o binaries/gophkeeperclient -ldflags=" -X 'main.buildDate=$CI_JOB_STARTED_AT' -X 'main.commitAuthor=$CI_COMMIT_AUTHOR' -X 'main.buildCommit=$CI_COMMIT_SHA' " -x -v cmd/gophkeeperclient/main.go
-##    - go build -o binaries/gophkeeperserver -ldflags=" -X 'main.buildDate=$CI_JOB_STARTED_AT' -X 'main.commitAuthor=$CI_COMMIT_AUTHOR' -X 'main.buildCommit=$CI_COMMIT_SHA' " -x -v cmd/gophkeeperserver/main.go
-##  artifacts:
-##    name: "binaries"
-##    paths:
-##      - binaries/
+      - name: Setup autotest binary
+        run: |
+          chmod -R +x $GITHUB_WORKSPACE/.tools/statictest
+          mv $GITHUB_WORKSPACE/.tools/statictest /usr/local/bin/statictest
+      - name: Run statictest
+        run: |
+          go vet -vettool=$(which statictest) ./...
