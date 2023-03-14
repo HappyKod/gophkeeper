@@ -25,6 +25,9 @@ type MyClient struct {
 // It returns the HTTP response and an error if any.
 func (c *MyClient) Get(url string) (resp *http.Response, err error) {
 	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
 	req.Header.Add("Authorization", c.Jwt)
 	return c.client.Do(req)
 }
@@ -36,6 +39,9 @@ func (c *MyClient) Get(url string) (resp *http.Response, err error) {
 // It returns the HTTP response and an error if any.
 func (c *MyClient) Post(url string, contentType string, body io.Reader) (resp *http.Response, err error) {
 	req, err := http.NewRequest(http.MethodPost, url, body)
+	if err != nil {
+		return nil, err
+	}
 	req.Header.Set("Content-Type", contentType)
 	req.Header.Set("Authorization", c.Jwt)
 	do, err := c.client.Do(req)
@@ -52,6 +58,9 @@ func (c *MyClient) Post(url string, contentType string, body io.Reader) (resp *h
 // It returns the HTTP response and an error if any.
 func (c *MyClient) Put(url string, contentType string, body io.Reader) (resp *http.Response, err error) {
 	req, err := http.NewRequest(http.MethodPut, url, body)
+	if err != nil {
+		return nil, err
+	}
 	req.Header.Set("Content-Type", contentType)
 	req.Header.Set("Authorization", c.Jwt)
 	do, err := c.client.Do(req)
