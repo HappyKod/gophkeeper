@@ -1,44 +1,56 @@
-name: gophkeer-ci
-
-#stages:
-#  - static-test
-#  - unit-tests
-#  - build
-
-#image: golang:1.19
-
 jobs:
-  runs-on: ubuntu-latest
-  container: golang:1.19
-  statictest:
-    steps:
-      - name: golangci-lint
-        run:
-          - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.50.1
-          - golangci-lint --version
-          - golangci-lint run
+static-test:
+runs-on: ubuntu-latest
+steps:
+  - name: Checkout code
+    uses: actions/checkout@v2
+  - name: Install golangci-lint
+    run: |
+      curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.50.1
+  - name: Run golangci-lint
+    run: golangci-lint run
+
+#name: gophkeer-ci
 #
-#errcheck-lint:
-#  stage: "static-test"
-#  script:
-#    - go install github.com/kisielk/errcheck@latest
-#    - errcheck ./...
+##stages:
+##  - static-test
+##  - unit-tests
+##  - build
 #
-#golang-test:
-#  stage: "unit-tests"
-#  script:
-#    - go test ./...
+##image: golang:1.19
 #
-#build:
-#  stage: "build"
-#  tags:
-#    - "docker"
-#  before_script:
-#    - mkdir binaries
-#  script:
-#    - go build -o binaries/gophkeeperclient -ldflags=" -X 'main.buildDate=$CI_JOB_STARTED_AT' -X 'main.commitAuthor=$CI_COMMIT_AUTHOR' -X 'main.buildCommit=$CI_COMMIT_SHA' " -x -v cmd/gophkeeperclient/main.go
-#    - go build -o binaries/gophkeeperserver -ldflags=" -X 'main.buildDate=$CI_JOB_STARTED_AT' -X 'main.commitAuthor=$CI_COMMIT_AUTHOR' -X 'main.buildCommit=$CI_COMMIT_SHA' " -x -v cmd/gophkeeperserver/main.go
-#  artifacts:
-#    name: "binaries"
-#    paths:
-#      - binaries/
+#jobs:
+#  runs-on: ubuntu-latest
+#  container: golang:1.19
+#  statictest:
+#    steps:
+#      - name: golangci-lint
+#        run:
+#          - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.50.1
+#          - golangci-lint --version
+#          - golangci-lint run
+##
+##errcheck-lint:
+##  stage: "static-test"
+##  script:
+##    - go install github.com/kisielk/errcheck@latest
+##    - errcheck ./...
+##
+##golang-test:
+##  stage: "unit-tests"
+##  script:
+##    - go test ./...
+##
+##build:
+##  stage: "build"
+##  tags:
+##    - "docker"
+##  before_script:
+##    - mkdir binaries
+##  script:
+##    - go build -o binaries/gophkeeperclient -ldflags=" -X 'main.buildDate=$CI_JOB_STARTED_AT' -X 'main.commitAuthor=$CI_COMMIT_AUTHOR' -X 'main.buildCommit=$CI_COMMIT_SHA' " -x -v cmd/gophkeeperclient/main.go
+##    - go build -o binaries/gophkeeperserver -ldflags=" -X 'main.buildDate=$CI_JOB_STARTED_AT' -X 'main.commitAuthor=$CI_COMMIT_AUTHOR' -X 'main.buildCommit=$CI_COMMIT_SHA' " -x -v cmd/gophkeeperserver/main.go
+##  artifacts:
+##    name: "binaries"
+##    paths:
+##      - binaries/
