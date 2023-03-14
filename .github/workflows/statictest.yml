@@ -1,27 +1,33 @@
-stages:
-  - static-test
-  - unit-tests
-  - build
+name: gophkeer-ci
 
-image: golang:1.19
+#stages:
+#  - static-test
+#  - unit-tests
+#  - build
 
-golangci-lint:
-  stage: "static-test"
-  script:
-    - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.50.1
-    - golangci-lint --version
-    - golangci-lint run
+#image: golang:1.19
 
-errcheck-lint:
-  stage: "static-test"
-  script:
-    - go install github.com/kisielk/errcheck@latest
-    - errcheck ./...
-
-golang-test:
-  stage: "unit-tests"
-  script:
-    - go test ./...
+jobs:
+  runs-on: centos-latest
+  container: golang:1.19
+  statictest:
+    steps:
+      - name: golangci-lint
+        run:
+          - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.50.1
+          - golangci-lint --version
+          - golangci-lint run
+#
+#errcheck-lint:
+#  stage: "static-test"
+#  script:
+#    - go install github.com/kisielk/errcheck@latest
+#    - errcheck ./...
+#
+#golang-test:
+#  stage: "unit-tests"
+#  script:
+#    - go test ./...
 #
 #build:
 #  stage: "build"
