@@ -14,8 +14,8 @@ import (
 
 func main() {
 	var client service.Clienter
-	client = &service.MyClient{}
 	var cfg models.Config
+	client = &service.MyClient{}
 	if err := env.Parse(&cfg); err != nil {
 		log.Fatalln("error config read", err)
 	}

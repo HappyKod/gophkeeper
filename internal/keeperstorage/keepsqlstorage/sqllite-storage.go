@@ -114,5 +114,5 @@ func (s *SqliteStorage) SyncSecret(ctx context.Context, userID string) ([]models
 		liteSecrets = append(liteSecrets, liteSecret)
 	}
 
-	return liteSecrets, nil
+	return liteSecrets, rows.Err()
 }

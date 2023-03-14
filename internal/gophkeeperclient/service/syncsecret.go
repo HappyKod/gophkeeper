@@ -125,7 +125,7 @@ func (s *Sync) Sync() error {
 
 	if len(secret) == 0 && len(serviceSecrets) != 0 {
 		for _, v := range serviceSecrets {
-			err = s.GetService(nil, v.ID)
+			err = s.GetService(ctx, v.ID)
 			if err != nil {
 				return err
 			}
@@ -202,6 +202,10 @@ func (s *Sync) GetService(ctx context.Context, secretID uuid.UUID) error {
 	post, err := s.client.Post(s.address+"/api/v1/", "application/json", bytes.NewBuffer(marshal))
 	if err != nil {
 		return err
+	}
+	err = post.Body.Close()
+	if err != nil {
+		log.Println(err)
 	}
 	all, err := io.ReadAll(post.Body)
 	if err != nil {

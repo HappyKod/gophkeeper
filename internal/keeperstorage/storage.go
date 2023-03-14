@@ -30,8 +30,8 @@ func NewKeeperStorage(cfg servermodels.Config) (KeeperStorage, error) {
 		if err != nil {
 			return nil, err
 		}
-	} else if cfg.DbPath != "" {
-		goferStorage, err = keepsqlstorage.NewSqliteStorage(cfg.DbPath)
+	} else if cfg.DBPath != "" {
+		goferStorage, err = keepsqlstorage.NewSqliteStorage(cfg.DBPath)
 		if err != nil {
 			return nil, err
 		}

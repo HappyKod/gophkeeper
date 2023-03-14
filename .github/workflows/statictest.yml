@@ -13,19 +13,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
-      - name: Download statictest binary
-        uses: robinraju/release-downloader@v1
-        with:
-          repository: Yandex-Practicum/go-autotests-bin
-          latest: true
-          fileName: statictest
-          out-file-path: .tools
-
-      - name: Setup autotest binary
+      - name: Install golangci-lint
         run: |
-          chmod -R +x $GITHUB_WORKSPACE/.tools/statictest
-          mv $GITHUB_WORKSPACE/.tools/statictest /usr/local/bin/statictest
-      - name: Run statictest
-        run: |
-          go vet -vettool=$(which statictest) ./...
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.50.1
+      - name: Run golangci-lint
+        run: golangci-lint run
+      - name: Install errcheck-lint
+        run: go install github.com/kisielk/errcheck@latest
+      - name: Run errcheck-lint
+        run: errcheck ./...
