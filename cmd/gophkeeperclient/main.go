@@ -12,7 +12,20 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+var (
+	buildDate    = "N/A"
+	buildCommit  = "N/A"
+	commitAuthor = "N/A"
+)
+
+func version() {
+	log.Printf("Build date: %s\n", buildDate)
+	log.Printf("Build commit: %s\n", buildCommit)
+	log.Printf("Commit Author: %s\n", commitAuthor)
+
+}
 func main() {
+	version()
 	var client service.Clienter
 	var cfg models.Config
 	client = &service.MyClient{}

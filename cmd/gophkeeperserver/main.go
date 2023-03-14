@@ -14,7 +14,20 @@ import (
 	"github.com/caarlos0/env/v6"
 )
 
+var (
+	buildDate    = "N/A"
+	buildCommit  = "N/A"
+	commitAuthor = "N/A"
+)
+
+func version() {
+	log.Printf("Build date: %s\n", buildDate)
+	log.Printf("Build commit: %s\n", buildCommit)
+	log.Printf("Commit Author: %s\n", commitAuthor)
+
+}
 func main() {
+	version()
 	var cfg models.Config
 	if err := env.Parse(&cfg); err != nil {
 		log.Fatalln("error config read", err)
