@@ -1,14 +1,52 @@
+name: CI
+
+on:
+push:
+  branches: [ DEV ]
+pull_request:
+  branches: [ main ]
+
 jobs:
-static-test:
-runs-on: ubuntu-latest
-steps:
-  - name: Checkout code
-    uses: actions/checkout@v2
-  - name: Install golangci-lint
-    run: |
-      curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.50.1
-  - name: Run golangci-lint
+  static-test:
+  runs-on: ubuntu-latest
+  steps:
+    - name: Checkout code
+  uses: actions/checkout@v2
+    - name: Install golangci-lint
+  run: |
+    curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.50.1
+    - name: Run golangci-lint
     run: golangci-lint run
+#    - name: Install errcheck-lint
+#  run: go install github.com/kisielk/errcheck@latest
+#    - name: Run errcheck-lint
+#  run: errcheck ./...
+#
+#  unit-tests:
+#  runs-on: ubuntu-latest
+#  steps:
+#    - name: Checkout code
+#  uses: actions/checkout@v2
+#    - name: Run unit tests
+#  run: go test ./...
+#
+#  build:
+#  runs-on: ubuntu-latest
+#  steps:
+#    - name: Checkout code
+#  uses: actions/checkout@v2
+#    - name: Create binaries directory
+#  run: mkdir binaries
+#    - name: Build gophkeeperclient
+#  run: go build -o binaries/gophkeeperclient -ldflags=" -X 'main.buildDate=$GITHUB_RUN_STARTED_AT' -X 'main.commitAuthor=$GITHUB_ACTOR' -X 'main.buildCommit=$GITHUB_SHA' " -x -v cmd/gophkeeperclient/main.go
+#    - name: Build gophkeeperserver
+#  run: go build -o binaries/gophkeeperserver -ldflags=" -X 'main.buildDate=$GITHUB_RUN_STARTED_AT' -X 'main.commitAuthor=$GITHUB_ACTOR' -X 'main.buildCommit=$GITHUB_SHA' " -x -v cmd/gophkeeperserver/main.go
+#    - name: Archive binaries
+#  uses: actions/upload-artifact@v2
+#  with:
+#  name: binaries
+#  path: binaries/
+
 
 #name: gophkeer-ci
 #
