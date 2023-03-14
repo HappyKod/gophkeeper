@@ -1,113 +1,113 @@
-name: CI
-
-on:
-  push:
-    branches:
-      - DEV
-
-jobs:
-  static-tests:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        go-version: 1.19
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Setup Go ${{ matrix.go-version }}
-        uses: actions/setup-go@v2
-        with:
-          go-version: ${{ matrix.go-version }}
-      - name: Install golangci-lint
-        run: |
-          curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $HOME/.local/bin v1.41.1
-          golangci-lint --version
-      - name: Run golangci-lint
-        run: golangci-lint run
-      - name: Install errcheck
-        run: go get -u github.com/kisielk/errcheck
-      - name: Run errcheck
-        run: errcheck ./...
-
-  unit-tests:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        go-version: 1.19
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Setup Go ${{ matrix.go-version }}
-        uses: actions/setup-go@v2
-        with:
-          go-version: ${{ matrix.go-version }}
-      - name: Run unit tests
-        run: go test -v -race ./...
-
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Build Go binaries
-        run: |
-          go build -o app -ldflags="-s -w" cmd/myapp/main.go
-          go build -o app-api -ldflags="-s -w" cmd/myappapi/main.go
-      - name: Archive binaries
-        uses: actions/upload-artifact@v2
-        with:
-          name: app binaries
-          path: |
-            app
-            app-api
-
-
-#name: go vet test
+#name: CI
 #
 #on:
-#  pull_request:
 #  push:
 #    branches:
-#      - main
+#      - DEV
 #
 #jobs:
-#  statictest:
+#  static-tests:
 #    runs-on: ubuntu-latest
-#    container: golang:1.19
+#    strategy:
+#      matrix:
+#        go-version: 1.19
 #    steps:
 #      - name: Checkout code
 #        uses: actions/checkout@v2
+#      - name: Setup Go ${{ matrix.go-version }}
+#        uses: actions/setup-go@v2
+#        with:
+#          go-version: ${{ matrix.go-version }}
 #      - name: Install golangci-lint
 #        run: |
-#          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.50.1
+#          curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $HOME/.local/bin v1.41.1
+#          golangci-lint --version
 #      - name: Run golangci-lint
 #        run: golangci-lint run
-#      - name: Install errcheck-lint
-#        run: go install github.com/kisielk/errcheck@latest
-#      - name: Run errcheck-lint
+#      - name: Install errcheck
+#        run: go get -u github.com/kisielk/errcheck
+#      - name: Run errcheck
 #        run: errcheck ./...
 #
 #  unit-tests:
 #    runs-on: ubuntu-latest
-#    container: golang:1.19
+#    strategy:
+#      matrix:
+#        go-version: 1.19
 #    steps:
 #      - name: Checkout code
 #        uses: actions/checkout@v2
+#      - name: Setup Go ${{ matrix.go-version }}
+#        uses: actions/setup-go@v2
+#        with:
+#          go-version: ${{ matrix.go-version }}
 #      - name: Run unit tests
-#        run: go test ./...
+#        run: go test -v -race ./...
+#
 #  build:
 #    runs-on: ubuntu-latest
 #    steps:
 #      - name: Checkout code
 #        uses: actions/checkout@v2
-#      - name: Create binaries directory
-#        run: mkdir binaries
-#      - name: Build gophkeeperclient
-#        run: go build -o binaries/gophkeeperclient -ldflags=" -X 'main.buildDate=$GITHUB_RUN_STARTED_AT' -X 'main.commitAuthor=$GITHUB_ACTOR' -X 'main.buildCommit=$GITHUB_SHA' " -x -v cmd/gophkeeperclient/main.go
-#      - name: Build gophkeeperserver
-#        run: go build -o binaries/gophkeeperserver -ldflags=" -X 'main.buildDate=$GITHUB_RUN_STARTED_AT' -X 'main.commitAuthor=$GITHUB_ACTOR' -X 'main.buildCommit=$GITHUB_SHA' " -x -v cmd/gophkeeperserver/main.go
+#      - name: Build Go binaries
+#        run: |
+#          go build -o app -ldflags="-s -w" cmd/myapp/main.go
+#          go build -o app-api -ldflags="-s -w" cmd/myappapi/main.go
 #      - name: Archive binaries
 #        uses: actions/upload-artifact@v2
-#    with:
-#      name: binaries
-#      path: binaries/
+#        with:
+#          name: app binaries
+#          path: |
+#            app
+#            app-api
+
+
+name: go vet test
+
+#on:
+#  pull_request:
+#  push:
+#    branches:
+#      - main
+
+jobs:
+  statictest:
+    runs-on: ubuntu-latest
+    container: golang:1.19
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Install golangci-lint
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.50.1
+      - name: Run golangci-lint
+        run: golangci-lint run
+      - name: Install errcheck-lint
+        run: go install github.com/kisielk/errcheck@latest
+      - name: Run errcheck-lint
+        run: errcheck ./...
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    container: golang:1.19
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Run unit tests
+        run: go test ./...
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Create binaries directory
+        run: mkdir binaries
+      - name: Build gophkeeperclient
+        run: go build -o binaries/gophkeeperclient -ldflags=" -X 'main.buildDate=$GITHUB_RUN_STARTED_AT' -X 'main.commitAuthor=$GITHUB_ACTOR' -X 'main.buildCommit=$GITHUB_SHA' " -x -v cmd/gophkeeperclient/main.go
+      - name: Build gophkeeperserver
+        run: go build -o binaries/gophkeeperserver -ldflags=" -X 'main.buildDate=$GITHUB_RUN_STARTED_AT' -X 'main.commitAuthor=$GITHUB_ACTOR' -X 'main.buildCommit=$GITHUB_SHA' " -x -v cmd/gophkeeperserver/main.go
+      - name: Archive binaries
+        uses: actions/upload-artifact@v2
+    with:
+      name: binaries
+      path: binaries/
