@@ -9,6 +9,7 @@ import (
 
 	"yudinsv/gophkeeper/internal/models"
 
+	"github.com/google/uuid"
 	_ "github.com/lib/pq"
 )
 
@@ -54,11 +55,16 @@ func (s *PostgresStorage) Close() error {
 
 // PutSecret adds a new secret to the database.
 func (s *PostgresStorage) PutSecret(ctx context.Context, secret models.Secret) error {
-	//TODO add on coflict (update)
 	_, err := s.db.ExecContext(ctx, `
-		INSERT INTO secrets (owner_id, value, secret_type, description, is_deleted)
-		VALUES ($1, $2, $3, $4, $5)
-	`, secret.OwnerID, secret.Value, secret.Type, secret.Description, secret.IsDeleted)
+		INSERT INTO public.secrets (id, owner_id, value, secret_type, description, is_deleted, ver)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		ON CONFLICT (id) DO UPDATE SET
+			owner_id = EXCLUDED.owner_id,
+			value = EXCLUDED.value,
+			description = EXCLUDED.description,
+			is_deleted = EXCLUDED.is_deleted,
+			ver = EXCLUDED.ver
+	`, secret.ID, secret.OwnerID, secret.Value, secret.Type, secret.Description, secret.IsDeleted, secret.Ver)
 
 	if err != nil {
 		return err
@@ -67,16 +73,15 @@ func (s *PostgresStorage) PutSecret(ctx context.Context, secret models.Secret) e
 	return nil
 }
 
-// GetSecret retrieves the first secret found in the database for a given owner ID.
-func (s *PostgresStorage) GetSecret(ctx context.Context, userID string) (models.Secret, error) {
+// GetSecret retrieves the first secret found in the store for a given secret ID.
+func (s *PostgresStorage) GetSecret(ctx context.Context, secretID uuid.UUID) (models.Secret, error) {
 	var secret models.Secret
 
 	err := s.db.QueryRowContext(ctx, `
 		SELECT id, owner_id, value, secret_type, description, is_deleted, ver
-		FROM secrets
-		WHERE owner_id = $1 AND is_deleted = false
-		LIMIT 1
-	`, userID).Scan(
+		FROM public.secrets
+		WHERE id = $1 AND is_deleted = false
+	`, secretID).Scan(
 		&secret.ID,
 		&secret.OwnerID,
 		&secret.Value,
@@ -97,11 +102,12 @@ func (s *PostgresStorage) GetSecret(ctx context.Context, userID string) (models.
 }
 
 // DeleteSecret removes the first secret found in the database for a given owner ID.
-func (s *PostgresStorage) DeleteSecret(ctx context.Context, userID string) error {
+func (s *PostgresStorage) DeleteSecret(ctx context.Context, secretID uuid.UUID) error {
 	err := s.db.QueryRowContext(ctx, `
-		UPDATE secrets
-		set owner_id = $1 AND is_deleted = true
-	`, userID).Err()
+		UPDATE public.secrets
+		set is_deleted = true
+		where id = $1
+	`, secretID).Err()
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -114,7 +120,7 @@ func (s *PostgresStorage) DeleteSecret(ctx context.Context, userID string) error
 
 func (s *PostgresStorage) SyncSecret(ctx context.Context, userID string) ([]models.LiteSecret, error) {
 	var liteSecrets []models.LiteSecret
-	rows, err := s.db.QueryContext(ctx, "SELECT id, md5(value) , md5(description), is_deleted, ver FROM secrets WHERE owner_id = $1", userID)
+	rows, err := s.db.QueryContext(ctx, "SELECT id, md5(value) , md5(description), is_deleted, ver FROM public.secrets WHERE owner_id = $1", userID)
 	if err != nil {
 		return nil, err
 	}
@@ -131,8 +137,5 @@ func (s *PostgresStorage) SyncSecret(ctx context.Context, userID string) ([]mode
 		}
 		liteSecrets = append(liteSecrets, liteSecret)
 	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return liteSecrets, nil
+	return liteSecrets, rows.Err()
 }

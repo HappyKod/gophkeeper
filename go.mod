@@ -6,8 +6,10 @@ require (
 	github.com/caarlos0/env/v6 v6.10.1
 	github.com/dgrijalva/jwt-go/v4 v4.0.0-preview1
 	github.com/gin-gonic/gin v1.9.0
+	github.com/golang/mock v1.4.4
 	github.com/google/uuid v1.3.0
 	github.com/lib/pq v1.10.7
+	github.com/mattn/go-sqlite3 v1.14.16
 	github.com/prometheus/client_golang v1.14.0
 	github.com/pterm/pterm v0.12.55
 	github.com/sarulabs/di v2.0.0+incompatible

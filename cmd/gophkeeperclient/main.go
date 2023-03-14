@@ -1,24 +1,43 @@
 package main
 
 import (
-	"github.com/pterm/pterm"
+	"log"
+
+	"yudinsv/gophkeeper/internal/gophkeeperclient/service"
+	"yudinsv/gophkeeper/internal/gophkeeperclient/window"
+	"yudinsv/gophkeeper/internal/gophkeeperserver/models"
+	"yudinsv/gophkeeper/internal/keeperstorage"
+
+	"github.com/caarlos0/env/v6"
+	_ "github.com/mattn/go-sqlite3"
 )
 
-const registration = "registration"
-const authorization = "authorization"
-
 func main() {
-	var options []string
-	options = append(options, registration)
-	options = append(options, authorization)
-
-	selectedOption, _ := pterm.DefaultInteractiveSelect.WithOptions(options).Show()
-	pterm.Info.Printfln("Selected option: %s", pterm.Green(selectedOption))
-	if selectedOption == registration {
-
-	} else {
-
+	var client service.Clienter
+	client = &service.MyClient{}
+	var cfg models.Config
+	if err := env.Parse(&cfg); err != nil {
+		log.Fatalln("error config read", err)
 	}
-
-	pterm.Description.Printfln("TODO: create client")
+	keeperStorage, err := keeperstorage.NewKeeperStorage(cfg)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	authorizationer := service.NewAuthorizationer(client, cfg.Address)
+	registrationer := service.NewRegistrationer(client, cfg.Address)
+	syncer := service.NewSyncer(keeperStorage, client, cfg.Address)
+	serviceClient := service.ClientService{
+		AuthService:     authorizationer,
+		RegistryService: registrationer,
+		SyncService:     syncer,
+	}
+	err = serviceClient.AuthService.Ping()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	err = serviceClient.RegistryService.Ping()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	window.RunWindow(serviceClient, keeperStorage)
 }

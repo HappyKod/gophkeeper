@@ -2,21 +2,24 @@ package keepermemstorage
 
 import (
 	"context"
+	"log"
 	"sync"
 
 	"yudinsv/gophkeeper/internal/constants"
 	"yudinsv/gophkeeper/internal/models"
 	"yudinsv/gophkeeper/internal/utils"
+
+	"github.com/google/uuid"
 )
 
 type MemoryStorage struct {
 	mu      sync.RWMutex
-	secrets map[int]models.Secret
+	secrets map[uuid.UUID]models.Secret
 }
 
 func NewMemoryStorage() *MemoryStorage {
 	return &MemoryStorage{
-		secrets: make(map[int]models.Secret),
+		secrets: make(map[uuid.UUID]models.Secret),
 	}
 }
 func (s *MemoryStorage) Ping() error {
@@ -29,6 +32,7 @@ func (s *MemoryStorage) Close() error {
 
 // PutSecret adds a new secret to the store.
 func (s *MemoryStorage) PutSecret(_ context.Context, secret models.Secret) error {
+	log.Println(secret)
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -38,14 +42,14 @@ func (s *MemoryStorage) PutSecret(_ context.Context, secret models.Secret) error
 	return nil
 }
 
-// GetSecret retrieves the first secret found in the store for a given owner ID.
-func (s *MemoryStorage) GetSecret(_ context.Context, userID string) (models.Secret, error) {
+// GetSecret retrieves the first secret found in the store for a given secret ID.
+func (s *MemoryStorage) GetSecret(_ context.Context, secretID uuid.UUID) (models.Secret, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
 	// Find the secret with the specified owner ID
 	for _, secret := range s.secrets {
-		if secret.OwnerID == userID {
+		if secret.ID == secretID {
 			return secret, nil
 		}
 	}
@@ -54,13 +58,13 @@ func (s *MemoryStorage) GetSecret(_ context.Context, userID string) (models.Secr
 }
 
 // DeleteSecret removes the first secret found in the store for a given owner ID.
-func (s *MemoryStorage) DeleteSecret(_ context.Context, userID string) error {
+func (s *MemoryStorage) DeleteSecret(_ context.Context, secretID uuid.UUID) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	// Find the secret with the specified owner ID
 	for id, secret := range s.secrets {
-		if secret.OwnerID == userID && !secret.IsDeleted {
+		if secret.ID == secretID && !secret.IsDeleted {
 			// Delete the secret from the map
 			secret.IsDeleted = true
 			s.secrets[id] = secret

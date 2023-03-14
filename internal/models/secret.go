@@ -1,9 +1,13 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type Secret struct {
-	ID          int       `json:"id"`
+	ID          uuid.UUID `json:"id"`
 	OwnerID     string    `json:"owner_id"`
 	Value       []byte    `json:"value"`
 	Type        string    `json:"secret_type"`

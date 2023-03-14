@@ -12,6 +12,7 @@ import (
 	"yudinsv/gophkeeper/internal/gophkeeperserver/container"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // getDataHandler handles requests for retrieving a secret.
@@ -27,7 +28,7 @@ import (
 // 400 - invalid request body;
 // 500 - internal server error.
 func getDataHandler(c *gin.Context) {
-	var secretID string
+	var secretID uuid.UUID
 	if err := c.ShouldBindJSON(&secretID); err != nil {
 		c.String(http.StatusBadRequest, err.Error())
 		return
