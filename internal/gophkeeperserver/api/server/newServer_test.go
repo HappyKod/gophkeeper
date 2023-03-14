@@ -9,16 +9,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// TestNewServer
-// Данный тест проверяет, что функция NewServer запускает сервер и проверяет,
-// что полученный статус код равен 200.
 func TestNewServer(t *testing.T) {
 	r := gin.Default()
 	r.GET("/", func(c *gin.Context) {
 		c.String(http.StatusOK, "")
 	})
-	addressService := "localhost:8080"
+	addressService := "localhost:5000"
 	go NewServer(r, addressService)
+	time.Sleep(2 * time.Second)
 	// Проверяем, что сервер запущен
 	resp, err := http.Get("http://" + addressService)
 	if err != nil {
@@ -29,9 +27,6 @@ func TestNewServer(t *testing.T) {
 	}
 }
 
-// TestNewServer_Shutdown
-// Данный тест проверяет, что функция NewServer корректно выключает сервер
-// при получении сигнала остановки.
 func TestNewServer_Shutdown(t *testing.T) {
 	r := gin.Default()
 	r.GET("/", func(c *gin.Context) {
