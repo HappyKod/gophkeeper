@@ -203,10 +203,12 @@ func (s *Sync) GetService(ctx context.Context, secretID uuid.UUID) error {
 	if err != nil {
 		return err
 	}
-	err = post.Body.Close()
-	if err != nil {
-		log.Println(err)
-	}
+	defer func() {
+		err = post.Body.Close()
+		if err != nil {
+			log.Println(err)
+		}
+	}()
 	all, err := io.ReadAll(post.Body)
 	if err != nil {
 		return err
